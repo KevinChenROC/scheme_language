@@ -224,19 +224,44 @@ def do_if_form(expressions, env):
     """Evaluate an if form."""
     check_form(expressions, 2, 3)
     # BEGIN Question 13
-    "*** REPLACE THIS LINE ***"
+    predicate, rest = scheme_eval(expressions.first, env), expressions.second
+    if scheme_true(predicate):
+        return scheme_eval(rest.first, env) 
+    if rest.second == nil:
+        altr = okay
+    else:
+        altr = scheme_eval(rest.second.first, env) 
+    return altr 
     # END Question 13
 
 def do_and_form(expressions, env):
     """Evaluate a short-circuited and form."""
     # BEGIN Question 14B
-    "*** REPLACE THIS LINE ***"
+    if expressions == nil:
+        return True 
+    while expressions is not nil:
+        value = scheme_eval(expressions.first, env)
+        if scheme_false(value):
+            return False
+        if expressions.second != nil:
+            expressions = expressions.second
+        else:
+            return value
     # END Question 14B
 
 def do_or_form(expressions, env):
     """Evaluate a short-circuited or form."""
     # BEGIN Question 14B
-    "*** REPLACE THIS LINE ***"
+    if expressions == nil:
+        return False 
+    while expressions is not nil:
+        value = scheme_eval(expressions.first, env)
+        if scheme_true(value):
+            return value
+        if expressions.second != nil:
+            expressions = expressions.second
+        else:
+            return False
     # END Question 14B
 
 def do_cond_form(expressions, env):
@@ -254,7 +279,9 @@ def do_cond_form(expressions, env):
             test = scheme_eval(clause.first, env)
         if scheme_true(test):
             # BEGIN Question 15A
-            "*** REPLACE THIS LINE ***"
+            if len(clause) == 1:
+                return test
+            return eval_all(clause.second, env)
             # END Question 15A
         expressions = expressions.second
         i += 1
@@ -271,7 +298,16 @@ def make_let_frame(bindings, env):
     if not scheme_listp(bindings):
         raise SchemeError("bad bindings list in let form")
     # BEGIN Question 16
-    "*** REPLACE THIS LINE ***"
+    ## remember to check_form(binding, 2, 2)
+    new_env = Frame(env)
+    while bindings is not nil:
+        binding = bindings.first
+        check_form(binding, 2, 2)
+        if not scheme_symbolp(binding.first):
+            raise SchemeError("Invalid binding symbol")  
+        new_env.define(binding.first, scheme_eval(binding.second.first, env))
+        bindings = bindings.second
+    return new_env
     # END Question 16
 
 SPECIAL_FORMS = {
