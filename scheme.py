@@ -46,8 +46,8 @@ def scheme_apply(procedure, args, env):
     if isinstance(procedure, PrimitiveProcedure):
         return apply_primitive(procedure, args, env)
     elif isinstance(procedure, UserDefinedProcedure):
-        new_env = make_call_frame(procedure, args, env)
-        return eval_all(procedure.body, new_env)
+        new_env = make_call_frame(procedure, args, procedure.env)#apply proc to args in the proc's env
+        return eval_all(procedure.body, new_env) 
     else:
         raise SchemeError("cannot call: {0}".format(str(procedure)))
 
@@ -76,15 +76,22 @@ def apply_primitive(procedure, args_scheme_list, env):
 
 def eval_all(expressions, env):
     """Evaluate a Scheme list of EXPRESSIONS & return the value of the last."""
-    # BEGIN Question 7
-    "*** REPLACE THIS LINE ***"
-    return scheme_eval(expressions.first, env)
+    # BEGIN Question 7 
+    if expressions == nil:
+        return okay
+    first, second = expressions.first, expressions.second
+    if second is not nil:
+        scheme_eval(first, env)
+        return eval_all(second, env)
+    else:
+        return scheme_eval(first, env)
     # END Question 7
 
 def make_call_frame(procedure, args, env):
     """Make a frame that binds the formal parameters of PROCEDURE to ARGS."""
     # BEGIN Question 12
-    "*** REPLACE THIS LINE ***"
+    check_formals(procedure.formals)
+    return env.make_child_frame(procedure.formals, args) 
     # END Question 12
 
 ################
@@ -131,7 +138,11 @@ class Frame:
         """
         child = Frame(self) # Create a new child with self as the parent
         # BEGIN Question 10
-        "*** REPLACE THIS LINE ***"
+        if formals.__len__() != vals.__len__():
+            raise SchemeError("The numbers of formals and values don't match.")
+        while formals is not nil:
+            child.define(formals.first, vals.first)
+            formals, vals = formals.second, vals.second            
         # END Question 10
         return child
 
@@ -178,7 +189,10 @@ def do_define_form(expressions, env):
         # END Question 5A
     elif isinstance(target, Pair) and scheme_symbolp(target.first):
         # BEGIN Question 9A
-        "*** REPLACE THIS LINE ***"
+        formals = target.second
+        body = expressions.second
+        env.define(target.first, LambdaProcedure(formals, body, env))
+        return target.first #return the procedure's name
         # END Question 9A
     else:
         bad = target.first if isinstance(target, Pair) else target
@@ -202,7 +216,8 @@ def do_lambda_form(expressions, env):
     formals = expressions.first
     check_formals(formals)
     # BEGIN Question 8
-    "*** REPLACE THIS LINE ***"
+    body = expressions.second
+    return LambdaProcedure(formals, body, env)
     # END Question 8
 
 def do_if_form(expressions, env):
@@ -294,7 +309,14 @@ def check_formals(formals):
     >>> check_formals(read_line("(a b c)"))
     """
     # BEGIN Question 11B
-    "*** REPLACE THIS LINE ***"
+    repeated = []
+    if not scheme_listp(formals):
+        raise SchemeError("malformed-list: formal parameters {0}".format(formals))
+    while formals is not nil:
+        if formals.first in repeated or not scheme_symbolp(formals.first):
+            raise SchemeError("formals symbol error")
+        repeated.append(formals.first)
+        formals = formals.second
     # END Question 11B
 
 #################
