@@ -85,7 +85,7 @@ def eval_all(expressions, env):
         scheme_eval(first, env)
         return eval_all(second, env)
     else:
-        return scheme_eval(first, env, True)
+        return scheme_eval(first, env)
     # END Question 7
 
 def make_call_frame(procedure, args, env):
@@ -231,11 +231,11 @@ def do_if_form(expressions, env):
     # BEGIN Question 13
     predicate, rest = scheme_eval(expressions.first, env), expressions.second
     if scheme_true(predicate):
-        return scheme_eval(rest.first, env, True) # tail = true
+        return scheme_eval(rest.first, env) # tail = true
     if rest.second == nil:
         altr = okay
     else:
-        altr = scheme_eval(rest.second.first, env, True) # tail = true
+        altr = scheme_eval(rest.second.first, env) # tail = true
     return altr # Return a Evaluate class or okay
     # END Question 13
 
@@ -245,13 +245,13 @@ def do_and_form(expressions, env):
     if expressions == nil:
         return True 
     while expressions is not nil:
-        if expressions.second == nil:
-            # last sub-expr in the AND form
-            return scheme_eval(expressions.first, env, True)
         value = scheme_eval(expressions.first, env)
         if scheme_false(value):
             return False
-        expressions = expressions.second
+        if expressions.second != nil:
+            expressions = expressions.second
+        else:
+            return value
     # END Question 14B
 
 def do_or_form(expressions, env):
@@ -260,13 +260,13 @@ def do_or_form(expressions, env):
     if expressions == nil:
         return False 
     while expressions is not nil:
-        if expressions.second == nil:
-            # last sub-expr in the OR form
-            return scheme_eval(expressions.first, env, True)
         value = scheme_eval(expressions.first, env)
         if scheme_true(value):
             return value
-        expressions = expressions.second
+        if expressions.second != nil:
+            expressions = expressions.second
+        else:
+            return False
     # END Question 14B
 
 def do_cond_form(expressions, env):
@@ -425,8 +425,8 @@ def scheme_optimized_eval(expr, env, tail=False):
     if tail:
         # BEGIN Extra Credit
         "if tail is true, expr is in the tail context, indicating a tail call"
-        "change other functions and or, eval_all, do_if, cond"
-        return Evaluate(expr, env)
+        "change other functions, (last sub-expr in and or begin let), eval_all, do_if, cond"
+        "*** REPLACE THIS LINE ***"
         # END Extra Credit
     else:
         result = Evaluate(expr, env)
@@ -448,7 +448,7 @@ def scheme_optimized_eval(expr, env, tail=False):
 ################################################################
 # Uncomment the following line to apply tail call optimization #
 ################################################################
-scheme_eval = scheme_optimized_eval
+#scheme_eval = scheme_optimized_eval
 
 
 ################

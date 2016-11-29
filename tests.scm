@@ -106,7 +106,6 @@ circumference
 (f 5)
 ; expect 136
 
-(exit)
 ;;; 1.1.6
 
 (define (abs x)

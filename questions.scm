@@ -17,8 +17,12 @@
 ;; Returns a list of two-element lists
 (define (enumerate s)
   ; BEGIN Question 18
-  'REPLACE-THIS-LINE
-  )
+  (define (iter index s)
+    (if (eq? s nil)
+	  nil
+      (cons (cons index (cons (car s) nil)) 
+            (iter (+ index 1) (cdr s)))))
+  (iter 0 s))
   ; END Question 18
 
 ;; Problem 19
